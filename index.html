@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload csv</title>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.js"></script>
+  <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.js"></script>
+  <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
+  <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/@holoviz/panel@0.13.0/dist/panel.min.js"></script>
+  <script type="text/javascript">
+    Bokeh.set_log_level("info");
+  </script>
+
+  <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+  <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+  <py-env>
+    - numpy
+    - pandas
+    - panel==0.13.1a2
+  </py-env>
+</head>
+<body>
+  <h1>Upload csv</h1>
+  
+  <div id="fileinput"></div>
+  <div id="upload"></div>
+  <div id="table"></div>
+  
+  <py-script>
+    import asyncio
+    import panel as pn
+    import pandas as pd
+    from panel.io.pyodide import show
+    
+    fileInput = pn.widgets.FileInput(accept='.csv')
+    uploadButton = pn.widgets.Button(name='Upload', button_type = 'primary')
+    
+    table = pn.widgets.Tabulator(pagination='remote', page_size=10)
+    
+    document.getElementById('table').style.display = 'none'
+    
+    def process_file(event):
+      if fileInput.value is not None:
+        table.value = pd.read_csv(io.BytesIO(fileInput.value))
+        document.getElementById('table').style.display = 'block'
+    
+    uploadButton.on_click(process_file)
+    
+    await show(fileInput, 'fileinput')
+    await show(uploadButton, 'upload')
+    await show(table, 'table')
+  </py-script>
+</body>
+</html>
